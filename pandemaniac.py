@@ -4,6 +4,8 @@ import networkx as nx
 import heapq
 import operator
 
+NUM_ROUNDS = 50
+
 def run(graph, num_seeds, num_players):
     json_data = open(graph).read()
     graph = json.loads(json_data)
@@ -20,9 +22,13 @@ def run(graph, num_seeds, num_players):
     b = nx.degree_centrality(G)
     d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
     d1 = dict(heapq.nlargest(num_seeds, b.items(), key=operator.itemgetter(1)))
+    
 
-    print d
-    print d1
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+    	for key in d:
+    		file.write(key + '\n')
+    file.close()
 
 if __name__ == '__main__':
     run('testgraph1.json', 20, 1)
