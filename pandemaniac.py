@@ -17,9 +17,12 @@ def run(graph, num_seeds, num_players):
             G.add_edge(node,link)
 
     c = nx.eigenvector_centrality(G)
+    b = nx.degree_centrality(G)
     d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
+    d1 = dict(heapq.nlargest(num_seeds, b.items(), key=operator.itemgetter(1)))
 
     print d
+    print d1
 
 if __name__ == '__main__':
     run('testgraph1.json', 20, 1)
