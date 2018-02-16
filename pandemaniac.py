@@ -1,6 +1,8 @@
 import json
 import argparse 
 import networkx as nx
+import heapq
+import operator
 
 def run(graph, num_seeds, num_players):
     json_data = open(graph).read()
@@ -14,4 +16,10 @@ def run(graph, num_seeds, num_players):
             G.add_node(link)
             G.add_edge(node,link)
 
-    print nx.info(G)
+    c = nx.eigenvector_centrality(G)
+    d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
+
+    print d
+
+if __name__ == '__main__':
+    run('testgraph1.json', 20, 1)
