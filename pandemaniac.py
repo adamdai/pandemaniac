@@ -12,23 +12,18 @@ def eigen_run(graph, num_seeds, num_players):
     graph = json.loads(json_data)
 
     G = nx.Graph()
-
+    degree_sum = 0
     for node in graph:
         G.add_node(node)
         for link in graph[node]:
             G.add_node(link)
             G.add_edge(node,link)
-
-    c = nx.eigenvector_centrality(G)
-    b = nx.degree_centrality(G)
-    d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
-    d1 = dict(heapq.nlargest(num_seeds, b.items(), key=operator.itemgetter(1)))
     
     file = open("seed_nodes.txt", "w")
     for i in range(NUM_ROUNDS):
-    	for key in d:
-    		file.write(key + '\n')
-    file.close()
+        for key in eig_d:
+            file.write(key + '\n')  
+    file.close()  
 
     return d.keys()
 
