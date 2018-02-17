@@ -6,7 +6,8 @@ import operator
 
 NUM_ROUNDS = 50
 
-def run(graph, num_seeds, num_players):
+# eignenvector centrality
+def eigen_run(graph, num_seeds, num_players):
     json_data = open(graph).read()
     graph = json.loads(json_data)
 
@@ -23,12 +24,13 @@ def run(graph, num_seeds, num_players):
     d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
     d1 = dict(heapq.nlargest(num_seeds, b.items(), key=operator.itemgetter(1)))
     
-
     file = open("seed_nodes.txt", "w")
     for i in range(NUM_ROUNDS):
     	for key in d:
     		file.write(key + '\n')
     file.close()
 
+    return d.keys()
+
 if __name__ == '__main__':
-    run('testgraph1.json', 20, 1)
+    eigen_run('2.5.1.json', 5, 1)
