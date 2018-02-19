@@ -3,6 +3,7 @@ import argparse
 import networkx as nx
 import heapq
 import operator
+import random
 
 NUM_ROUNDS = 50
 
@@ -18,14 +19,66 @@ def eigen_run(graph, num_seeds, num_players):
         for link in graph[node]:
             G.add_node(link)
             G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
     
     file = open("seed_nodes.txt", "w")
     for i in range(NUM_ROUNDS):
-        for key in eig_d:
+        for key in d:
             file.write(key + '\n')  
     file.close()  
 
     return d.keys()
+
+# degree centrality
+def degree_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    b = nx.degree_centrality(G)
+    d = dict(heapq.nlargest(num_seeds, b.items(), key=operator.itemgetter(1)))
+    
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for key in d:
+            file.write(key + '\n')  
+    file.close()  
+
+    return d.keys()
+
+# probabilistic eignenvector centrality
+def eigen_prob_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(heapq.nlargest(num_seeds*2, c.items(), key=operator.itemgetter(1)))
+    seeds = random.sample(list(d), num_seeds)
+
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for node in seeds:
+            file.write(node + '\n')  
+    file.close()  
+
+    return seeds
 
 def voting_run(graph, num_seeds, num_players):
     json_data = open(graph).read()
@@ -72,6 +125,8 @@ def voting_run(graph, num_seeds, num_players):
             file.write(key + '\n')  
     file.close()  
 
+    return seeds.keys()
+
 
 if __name__ == '__main__':
-    eigen_run('2.5.1.json', 5, 1)
+    eigen_prob_run('2.5.1.json', 5, 1)
