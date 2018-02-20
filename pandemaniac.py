@@ -31,6 +31,62 @@ def eigen_run(graph, num_seeds, num_players):
 
     return d.keys()
 
+# eignenvector centrality
+def eigen_spread_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(c.items())
+    eig_values = sorted(d.values(), reverse = True)
+    nodes = d.keys()
+    ordered_nodes = [None] * len(nodes)
+    for node in nodes:
+
+        ordered_nodes[eig_values.index(d[node])] = node
+
+    for i in range(len(ordered_nodes)):
+        if ordered_nodes[i] == None:
+
+            value = d[ordered_nodes[i-1]]
+            for key in d:
+                if d[key] == value:
+                    if key not in ordered_nodes:
+                        ordered_nodes[i] = key
+                        break
+    seed_nodes = [ordered_nodes[0]]
+    
+    for node in ordered_nodes:
+        if len(seed_nodes) < num_seeds:
+            too_close = 0
+            if node not in seed_nodes:
+                for i in G.neighbors(node):
+                    if i in seed_nodes:
+                        too_close = 1
+                if too_close == 0:
+                    seed_nodes.append(node)
+        else:
+            break
+
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for i in seed_nodes:
+            file.write(i + '\n')  
+    file.close()  
+
+    return seed_nodes
+
+
+
+
 # degree centrality
 def degree_run(graph, num_seeds, num_players):
     json_data = open(graph).read()
@@ -121,12 +177,12 @@ def voting_run(graph, num_seeds, num_players):
 
     file = open("seed_nodes.txt", "w")
     for i in range(NUM_ROUNDS):
-        for key in seeds:
+        for i in seeds:
             file.write(key + '\n')  
     file.close()  
 
-    return seeds.keys()
+    return seeds
 
 
 if __name__ == '__main__':
-    eigen_prob_run('2.5.1.json', 5, 1)
+    eigen_spread_run('2.5.1.json', 10, 1)
