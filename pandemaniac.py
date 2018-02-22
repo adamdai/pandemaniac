@@ -31,6 +31,30 @@ def eigen_run(graph, num_seeds, num_players):
 
     return d.keys()
 
+# closeness centrality
+def closeness_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.closeness_centrality(G)
+    d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
+    
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for key in d:
+            file.write(key + '\n')  
+    file.close()  
+
+    return d.keys()
+
 # eignenvector centrality
 def eigen_spread_run(graph, num_seeds, num_players):
     json_data = open(graph).read()
@@ -185,4 +209,4 @@ def voting_run(graph, num_seeds, num_players):
 
 
 if __name__ == '__main__':
-    eigen_spread_run('2.5.1.json', 10, 1)
+    closeness_run('8.20.7.json', 20, 1)
