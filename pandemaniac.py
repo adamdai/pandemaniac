@@ -31,6 +31,29 @@ def eigen_run(graph, num_seeds, num_players):
 
     return d.keys()
 
+def not_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(heapq.nlargest(num_seeds, c.items(), key=operator.itemgetter(1)))
+    
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for key in d:
+            file.write(key + '\n')  
+    file.close()  
+
+    return d.keys()
+
 # closeness centrality
 def closeness_run(graph, num_seeds, num_players):
     json_data = open(graph).read()
@@ -54,6 +77,61 @@ def closeness_run(graph, num_seeds, num_players):
     file.close()  
 
     return d.keys()
+
+def combo_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+
+
+    c = nx.eigenvector_centrality(G)
+    e = nx.closeness_centrality(G)
+    f = nx.degree_centrality(G)
+
+    c = dict(c.items())
+    e = dict(e.items())
+    f = dict(f.items())
+
+
+    c_sort = [None] * len(c.keys())
+    e_sort = [None] * len(e.keys())
+    f_sort = [None] * len(f.keys())
+
+    node_key = sorted(c.keys())
+    for i in range(len(node_key)):
+        c_sort[i] = c[node_key[i]]
+        e_sort[i] = e[node_key[i]]
+        f_sort[i] = f[node_key[i]]
+
+    sum_norm = [None] * len(c_sort)
+
+    for i in range(len(c_sort)):
+        c_sort[i] = (c_sort[i] - min(c_sort)) / (max(c_sort) - min(c_sort))
+    for i in range(len(e_sort)):
+        e_sort[i] = (e_sort[i] - min(e_sort)) / (max(e_sort) - min(e_sort))
+    for i in range(len(f_sort)):
+        f_sort[i] = (f_sort[i] - min(f_sort)) / (max(f_sort) - min(f_sort))
+    for i in range(len(c_sort)):
+        sum_norm[i] = c_sort[i] + e_sort[i] + f_sort[i]
+
+    seeds = []
+
+    while len(seeds) < num_seeds:
+        max_index = sum_norm.index(max(sum_norm))
+        seeds.append(node_key[max_index])
+        del sum_norm[max_index]
+        del node_key[max_index]
+    print seeds
+
+    return seeds
 
 # eignenvector centrality
 def eigen_spread_run(graph, num_seeds, num_players):
@@ -386,7 +464,16 @@ def voting_run(graph, num_seeds, num_players):
 
 
 if __name__ == '__main__':
-    eigen_2_run('8.20.6.json', 20, 1)
+    print 'combo'
+    print combo_run('8.20.6.json', 20, 1)
+    print 'eigen'
+    print eigen_run('8.20.6.json', 20, 1)
+    print 'spread'
+    print eigen_spread_run('8.20.6.json', 20, 1)
+    print 'closest'
+    print closeness_run('8.20.6.json', 20, 1)
+    print 'degree'
+    print degree_run('8.20.6.json', 20, 1)
 
   
 
