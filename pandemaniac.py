@@ -106,7 +106,184 @@ def eigen_spread_run(graph, num_seeds, num_players):
             file.write(i + '\n')  
     file.close()  
 
+
     return seed_nodes
+
+def eigen_2_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(c.items())
+    eig_values = sorted(d.values(), reverse = True)
+    nodes = d.keys()
+    ordered_nodes = [None] * len(nodes)
+    for node in nodes:
+
+        ordered_nodes[eig_values.index(d[node])] = node
+
+    for i in range(len(ordered_nodes)):
+        if ordered_nodes[i] == None:
+
+            value = d[ordered_nodes[i-1]]
+            for key in d:
+                if d[key] == value:
+                    if key not in ordered_nodes:
+                        ordered_nodes[i] = key
+                        break
+    top_nodes = ordered_nodes[:num_seeds]
+    seed_nodes = []
+    for node in ordered_nodes:
+        count = 0
+ 
+        for seed in G.neighbors(node):
+        
+            if ((len(seed_nodes) < num_seeds) and (count < 2)):
+                if seed not in top_nodes:
+                    if seed not in seed_nodes:
+                        seed_nodes.append(seed)
+                        count += 1
+    if len(seed_nodes) < num_seeds:
+        seed_nodes.append(top_nodes[:(num_seeds - len(seed_nodes))])
+
+
+        
+
+
+
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for i in seed_nodes:
+            file.write(i + '\n')  
+    file.close()  
+    # print seed_nodes
+    # print top_nodes
+    # for node in top_nodes:
+    #     print G.neighbors(node)
+
+    return seed_nodes
+
+def eigen_neighbor_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(c.items())
+    eig_values = sorted(d.values(), reverse = True)
+    nodes = d.keys()
+    ordered_nodes = [None] * len(nodes)
+    for node in nodes:
+
+        ordered_nodes[eig_values.index(d[node])] = node
+
+    for i in range(len(ordered_nodes)):
+        if ordered_nodes[i] == None:
+
+            value = d[ordered_nodes[i-1]]
+            for key in d:
+                if d[key] == value:
+                    if key not in ordered_nodes:
+                        ordered_nodes[i] = key
+                        break
+    seed_nodes_new = []
+    for node in ordered_nodes:
+
+        if len(seed_nodes_new) < num_seeds:
+            seed = G.neighbors(node)[random.randint(0,len(G.neighbors(node)) - 1)]
+            if seed not in seed_nodes_new:
+                seed_nodes_new.append(seed)
+        else:
+            break
+
+
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for i in seed_nodes_new:
+            file.write(i + '\n')  
+    file.close()  
+
+
+    return seed_nodes_new
+
+# eignenvector centrality
+def eigen_spread_neighbor_run(graph, num_seeds, num_players):
+    json_data = open(graph).read()
+    graph = json.loads(json_data)
+
+    G = nx.Graph()
+    degree_sum = 0
+    for node in graph:
+        G.add_node(node)
+        for link in graph[node]:
+            G.add_node(link)
+            G.add_edge(node,link)
+
+    c = nx.eigenvector_centrality(G)
+    d = dict(c.items())
+    eig_values = sorted(d.values(), reverse = True)
+    nodes = d.keys()
+    ordered_nodes = [None] * len(nodes)
+    for node in nodes:
+
+        ordered_nodes[eig_values.index(d[node])] = node
+
+    for i in range(len(ordered_nodes)):
+        if ordered_nodes[i] == None:
+
+            value = d[ordered_nodes[i-1]]
+            for key in d:
+                if d[key] == value:
+                    if key not in ordered_nodes:
+                        ordered_nodes[i] = key
+                        break
+    seed_nodes = [ordered_nodes[0]]
+    
+    for node in ordered_nodes:
+
+        too_close = 0
+        if node not in seed_nodes:
+            for i in G.neighbors(node):
+                if i in seed_nodes:
+                    too_close = 1
+            if too_close == 0:
+                seed_nodes.append(node)
+
+    seed_nodes_new = []
+    for node in seed_nodes:
+
+        if len(seed_nodes_new) < num_seeds:
+            seed = G.neighbors(node)[random.randint(0,len(G.neighbors(node)) - 1)]
+            if seed not in seed_nodes_new:
+                seed_nodes_new.append(seed)
+        else:
+            break
+
+
+
+    file = open("seed_nodes.txt", "w")
+    for i in range(NUM_ROUNDS):
+        for i in seed_nodes_new:
+            file.write(i + '\n')  
+    file.close()  
+    
+
+    return seed_nodes_new
 
 
 
@@ -209,4 +386,8 @@ def voting_run(graph, num_seeds, num_players):
 
 
 if __name__ == '__main__':
-    closeness_run('8.20.7.json', 20, 1)
+    eigen_2_run('8.20.6.json', 20, 1)
+
+  
+
+
